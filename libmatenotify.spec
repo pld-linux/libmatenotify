@@ -1,8 +1,10 @@
+# NOTE: deprecated package, MATE 1.6 uses libnotify 0.7+
 #
 # Conditional build:
 %bcond_without	apidocs		# disable gtk-doc
 
-Summary:	Libraries for mate notify
+Summary:	MATE Notifications library
+Summary(pl.UTF-8):	Biblioteka powiadomień dla środowiska MATE
 Name:		libmatenotify
 Version:	1.5.0
 Release:	1
@@ -11,25 +13,46 @@ Group:		Libraries
 Source0:	http://pub.mate-desktop.org/releases/1.5/%{name}-%{version}.tar.xz
 # Source0-md5:	28a1526c93f9a28a3cea9fdefbc47b41
 URL:		http://wiki.mate-desktop.org/libmatenotify
+BuildRequires:	autoconf >= 2.53
+BuildRequires:	automake >= 1:1.10
 BuildRequires:	dbus-devel >= 0.76
 BuildRequires:	dbus-glib-devel >= 0.76
 BuildRequires:	glib2-devel >= 1:2.6
 BuildRequires:	gtk+2-devel >= 2:2.18
-BuildRequires:	mate-common
+BuildRequires:	gtk-doc >= 1.4
+BuildRequires:	libtool >= 1:1.4.3
+%{?with_apidocs:BuildRequires:	xmlto}
 BuildRequires:	tar >= 1:1.22
 BuildRequires:	xz
+Requires:	dbus-libs >= 0.76
+Requires:	dbus-glib >= 0.76
+Requires:	glib2 >= 1:2.6
+Requires:	gtk+2 >= 2:2.18
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-Libraries for mate notify.
+MATE Notifications library (used up to MATE 1.5.0). It's a fork of
+pre-0.7 libnotify.
+
+%description -l pl.UTF-8
+Biblioteka powiadomień dla środowiska MATE (do wersji 1.5.0). Jest to
+odgałęzienie libnotify sprzed wersji 0.7.
 
 %package devel
-Summary:	Development libraries for libmatenotify
+Summary:	Development files for libmatenotify
+Summary(pl.UTF-8):	Pliki programistyczne biblioteki libmatenotify
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	dbus-devel >= 0.76
+Requires:	dbus-glib-devel >= 0.76
+Requires:	glib2-devel >= 1:2.6
+Requires:	gtk+2-devel >= 2:2.18
 
 %description devel
-Development libraries for libmatenotify
+Development files for libmatenotify.
+
+%description devel -l pl.UTF-8
+Pliki programistyczne biblioteki libmatenotify.
 
 %package apidocs
 Summary:	libmatenotify API documentation
@@ -51,13 +74,18 @@ Dokumentacja API biblioteki libmatenotify.
 %setup -q
 
 %build
-NOCONFIGURE=1 ./autogen.sh
+%{__libtoolize}
+%{__gtkdocize}
+%{__aclocal}
+%{__autoconf}
+%{__autoheader}
+%{__automake}
 %configure \
-	--with-html-dir=%{_gtkdocdir} \
-	--disable-static
+	--disable-silent-rules \
+	--disable-static \
+	--with-html-dir=%{_gtkdocdir}
 
-%{__make} \
-	V=1
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -76,16 +104,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING README
+%doc AUTHORS ChangeLog NEWS README
 %attr(755,root,root) %{_bindir}/mate-notify-send
 %attr(755,root,root) %{_libdir}/libmatenotify.so.*.*.*
-%ghost %{_libdir}/libmatenotify.so.1
+%attr(755,root,root) %ghost %{_libdir}/libmatenotify.so.1
 
 %files devel
 %defattr(644,root,root,755)
-%{_libdir}/libmatenotify.so
-%{_pkgconfigdir}/libmatenotify.pc
+%attr(755,root,root) %{_libdir}/libmatenotify.so
 %{_includedir}/libmatenotify
+%{_pkgconfigdir}/libmatenotify.pc
 
 %if %{with apidocs}
 %files apidocs
